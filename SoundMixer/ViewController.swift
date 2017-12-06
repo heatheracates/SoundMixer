@@ -10,10 +10,10 @@ import UIKit
 import AVFoundation
 
 class ViewController: UIViewController, UITableViewDataSource, UITableViewDelegate {
-
+    
     @IBOutlet weak var tableView: UITableView!
     var sounds : [Sound] = []
-     var audioPlayer : AVAudioPlayer?
+    var audioPlayer : AVAudioPlayer?
     override func viewDidLoad() {
         super.viewDidLoad()
         tableView.dataSource = self
@@ -21,7 +21,7 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
         // Do any additional setup after loading the view, typically from a nib.
     }
     override func viewWillAppear(_ animated: Bool) {
-       let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
+        let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
         do{
             try sounds = context.fetch(Sound.fetchRequest())
             tableView.reloadData()
@@ -41,7 +41,7 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-       let sound = sounds[indexPath.row]
+        let sound = sounds[indexPath.row]
         do{
             try audioPlayer = AVAudioPlayer(data: sound.audio as! Data)
             audioPlayer!.play()
@@ -49,13 +49,28 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
         catch{}
     }
     
-
+    func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
+        if (editingStyle == .delete) {
+            let sound = sounds[indexPath.row]
+            let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
+            context.delete(sound)
+            (UIApplication.shared.delegate as! AppDelegate).saveContext()
+            do{
+                try sounds = context.fetch(Sound.fetchRequest())
+                tableView.reloadData()
+            }
+            catch{}
+            
+        }
+    }
+    
+    
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
-
-
+    
+    
 }
 
 
